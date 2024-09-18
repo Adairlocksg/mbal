@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 350 93% 90%; /* Rosa claro como fundo */
+    --foreground: 350 93% 20%; /* Cor mais escura para o texto em contraste com o fundo */
+    --card: 350 93% 95%; /* Tom ligeiramente mais claro para os cards */
+    --card-foreground: 350 93% 20%; /* Contraste escuro para o texto do card */
+    --popover: 350 93% 95%; /* Similar ao card para popovers */
+    --popover-foreground: 350 93% 20%; /* Texto de contraste */
+    --primary: 350 93% 84%; /* Baseado na cor primária #FDB0C0 */
+    --primary-foreground: 350 100% 98%; /* Um tom muito claro para texto */
+    --secondary: 350 50% 80%; /* Um tom mais claro para contraste */
+    --secondary-foreground: 350 93% 20%; /* Contraste escuro para o texto */
+    --muted: 350 50% 85%; /* Tom suave para elementos desativados */
+    --muted-foreground: 350 25% 50%; /* Texto em elementos desativados */
+    --accent: 350 50% 85%; /* Similar ao secundário, pode ser usado para realces */
+    --accent-foreground: 350 93% 20%; /* Contraste escuro para o texto */
+    --destructive: 0 84.2% 60.2%; /* Vermelho original para ações destrutivas */
+    --destructive-foreground: 350 100% 98%; /* Texto claro em fundo destrutivo */
+    --border: 350 50% 85%; /* Um tom claro para bordas */
+    --input: 350 50% 85%; /* Input com tom claro */
+    --ring: 350 93% 20%; /* Cor de destaque para anéis de foco */
+    --radius: 0.5rem; /* Raio de borda padrão */
+    --chart-1: 350 93% 70%; /* Um tom de rosa mais vibrante para o primeiro gráfico */
+    --chart-2: 320 58% 55%; /* Um tom relacionado, mas mais escuro */
+    --chart-3: 330 37% 40%; /* Outro tom de rosa mais suave e escuro */
+    --chart-4: 10 74% 66%; /* Um tom alaranjado suave */
+    --chart-5: 30 87% 67%; /* Um tom amarelo suave */
+
+    /* Checkbox specific colors */
+    --checkbox-border: hsl(350, 40%, 50%); /* Borda do checkbox */
+    --checkbox-background: transparent; /* Fundo quando o checkbox estiver marcado */
+    --checkbox-checked-border: hsl(350, 50%, 40%); /* Borda mais escura quando marcado */
+    --checkbox-checked-icon: hsl(350, 93%, 20%); /* Cor do ícone (check) mais escura quando marcado */
+  
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+body {
+  height: 100%;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #000;
+  border-radius: 5px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888;
+
+  border-radius: 5px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
