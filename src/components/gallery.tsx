@@ -12,24 +12,9 @@ import {
   uploadBytesResumable,
 } from "firebase/storage";
 
-// const images = [
-//   "/placeholder.svg?height=300&width=300",
-//   "/placeholder.svg?height=300&width=300",
-//   "/placeholder.svg?height=300&width=300",
-//   "/placeholder.svg?height=300&width=300",
-//   "/placeholder.svg?height=300&width=300",
-//   "/placeholder.svg?height=300&width=300",
-//   "/placeholder.svg?height=300&width=300",
-//   "/placeholder.svg?height=300&width=300",
-//   "/placeholder.svg?height=300&width=300",
-//   "/placeholder.svg?height=300&width=300",
-//   "/placeholder.svg?height=300&width=300",
-// ];
-
 export default function Gallery() {
   const [view, setView] = useState<GalleryView>(GalleryView.Carousel);
   const [images, setImages] = useState<string[]>([]); // URLs das imagens
-  const [image, setImage] = useState<File | null>(null); // Imagem a ser carregada
   const [progress, setProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null); // Referência para o input de arquivo
 
@@ -50,7 +35,6 @@ export default function Gallery() {
   // Manipulação do upload de arquivo
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files === null) return;
-    setImage(e.target.files[0]); // Define o arquivo selecionado
 
     // Chama o handleUpload após a seleção da imagem
     handleUpload(e.target.files[0]);
@@ -76,7 +60,6 @@ export default function Gallery() {
         const url = await getDownloadURL(uploadTask.snapshot.ref);
         setImages((prev) => [...prev, url]); // Adiciona a nova URL à galeria
         setProgress(0); // Reseta o progresso
-        setImage(null); // Limpa a imagem
       }
     );
   };
