@@ -73,7 +73,7 @@ export default function Gallery() {
   return (
     <div className="container mx-auto p-4 bg-background min-h-screen">
       <h1 className="text-3xl font-bold text-center mb-6 text-primary">
-        Galeria de Imagens
+        Nosso álbum ❤
       </h1>
 
       <div className="flex justify-between mb-6">
