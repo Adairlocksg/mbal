@@ -1,87 +1,145 @@
-"use client";
-
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 import { PlusCircle, LayoutList, Grid } from "lucide-react";
+import GalleryCarousel from "./gallery-carousell";
+import GalleryList from "./gallery-list";
+import { GalleryView } from "@/types/Gallery";
+import { storage } from "@/firebase";
+import {
+  ref,
+  listAll,
+  getDownloadURL,
+  uploadBytesResumable,
+} from "firebase/storage";
 
-const images = [
-  "/placeholder.svg?height=300&width=300",
-  "/placeholder.svg?height=300&width=300",
-  "/placeholder.svg?height=300&width=300",
-  "/placeholder.svg?height=300&width=300",
-  "/placeholder.svg?height=300&width=300",
-  "/placeholder.svg?height=300&width=300",
-];
+// const images = [
+//   "/placeholder.svg?height=300&width=300",
+//   "/placeholder.svg?height=300&width=300",
+//   "/placeholder.svg?height=300&width=300",
+//   "/placeholder.svg?height=300&width=300",
+//   "/placeholder.svg?height=300&width=300",
+//   "/placeholder.svg?height=300&width=300",
+//   "/placeholder.svg?height=300&width=300",
+//   "/placeholder.svg?height=300&width=300",
+//   "/placeholder.svg?height=300&width=300",
+//   "/placeholder.svg?height=300&width=300",
+//   "/placeholder.svg?height=300&width=300",
+// ];
 
 export default function Gallery() {
-  const [view, setView] = useState<"carousel" | "list">("carousel");
+  const [view, setView] = useState<GalleryView>(GalleryView.Carousel);
+  const [images, setImages] = useState<string[]>([]); // URLs das imagens
+  const [image, setImage] = useState<File | null>(null); // Imagem a ser carregada
+  const [progress, setProgress] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null); // Referência para o input de arquivo
+
+  // Carrega as imagens do Firebase
+  useEffect(() => {
+    const fetchImages = async () => {
+      const imagesRef = ref(storage, "images/");
+      const result = await listAll(imagesRef);
+      const urls = await Promise.all(
+        result.items.map((itemRef) => getDownloadURL(itemRef))
+      );
+      setImages(urls);
+    };
+
+    fetchImages();
+  }, []);
+
+  // Manipulação do upload de arquivo
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files === null) return;
+    setImage(e.target.files[0]); // Define o arquivo selecionado
+
+    // Chama o handleUpload após a seleção da imagem
+    handleUpload(e.target.files[0]);
+  };
+
+  const handleUpload = (image: File) => {
+    if (!image) return;
+
+    const storageRef = ref(storage, `images/${image.name}`);
+    const uploadTask = uploadBytesResumable(storageRef, image);
+
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        const progress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        setProgress(progress);
+      },
+      (error) => {
+        console.error("Erro no upload:", error);
+      },
+      async () => {
+        const url = await getDownloadURL(uploadTask.snapshot.ref);
+        setImages((prev) => [...prev, url]); // Adiciona a nova URL à galeria
+        setProgress(0); // Reseta o progresso
+        setImage(null); // Limpa a imagem
+      }
+    );
+  };
+
+  const triggerFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click(); // Dispara o clique no input escondido
+    }
+  };
 
   return (
     <div className="container mx-auto p-4 bg-background min-h-screen">
       <h1 className="text-3xl font-bold text-center mb-6 text-primary">
         Galeria de Imagens
       </h1>
+
       <div className="flex justify-between mb-6">
+        {/* Botão para alternar entre carrossel e listagem */}
         <Button
           variant="outline"
           size="icon"
-          onClick={() => setView(view === "carousel" ? "list" : "carousel")}
+          onClick={() =>
+            setView(
+              view === GalleryView.Carousel
+                ? GalleryView.List
+                : GalleryView.Carousel
+            )
+          }
           className="bg-card hover:bg-accent"
         >
-          {view === "carousel" ? (
+          {view === GalleryView.Carousel ? (
             <LayoutList className="h-4 w-4" />
           ) : (
             <Grid className="h-4 w-4" />
           )}
         </Button>
-        <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+
+        {/* Botão de upload de imagem, que dispara o input escondido */}
+        <Button
+          className="bg-primary hover:bg-primary/90 text-primary-foreground"
+          onClick={triggerFileInput}
+        >
           <PlusCircle className="h-4 w-4 mr-2" /> Adicionar Imagem
         </Button>
+
+        {/* Input de arquivo escondido */}
+        <input
+          type="file"
+          accept="image/*"
+          ref={fileInputRef}
+          onChange={handleImageChange} // A imagem é carregada quando o arquivo é selecionado
+          style={{ display: "none" }} // Esconde o input
+        />
       </div>
-      {view === "carousel" ? (
-        <Carousel className="w-full max-w-xl mx-auto">
-          <CarouselContent>
-            {images.map((src, index) => (
-              <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
-                <div className="p-1">
-                  <Card className="border-2 border-border">
-                    <CardContent className="flex aspect-square items-center justify-center p-2">
-                      <img
-                        src={src}
-                        alt={`Imagem ${index + 1}`}
-                        className="rounded-lg object-cover w-full h-full"
-                      />
-                    </CardContent>
-                  </Card>
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
-        </Carousel>
+
+      {/* Mostra o progresso do upload */}
+      {progress > 0 && <p>Progresso do upload: {progress}%</p>}
+
+      {/* Exibição da galeria */}
+      {view === GalleryView.Carousel ? (
+        <GalleryCarousel images={images} />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {images.map((src, index) => (
-            <Card key={index} className="border-2 border-border">
-              <CardContent className="flex aspect-square items-center justify-center p-2">
-                <img
-                  src={src}
-                  alt={`Imagem ${index + 1}`}
-                  className="rounded-lg object-cover w-full h-full"
-                />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <GalleryList images={images} />
       )}
     </div>
   );

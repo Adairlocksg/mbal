@@ -85,18 +85,18 @@ body {
 
 /* Track */
 ::-webkit-scrollbar-track {
-  background: #000;
+  background: #FDB0C0;
   border-radius: 5px;
 }
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: #888;
+  background: hsl(350, 40%, 50%);
 
   border-radius: 5px;
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: hsl(350, 40%, 50%);
 }
