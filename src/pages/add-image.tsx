@@ -7,13 +7,14 @@ import { CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom"; // Para navegação
 import { Input } from "@/components/ui/input";
 import Progress from "@/components/progress";
+import LoadingButton from "@/components/ui/base/loading-button";
 
 const AddImage = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [progress, setProgress] = useState(0);
   const [url, setUrl] = useState<string | undefined>(undefined);
   const [caption, setCaption] = useState<string>("");
-  //   const [isSaving, setIsSaving] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const navigate = useNavigate();
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,7 +58,10 @@ const AddImage = () => {
   };
 
   const handleSave = () => {
-    console.log("Salvando de cria");
+    setIsSaving(true);
+    setTimeout(() => {
+      setIsSaving(false);
+    }, 1000);
   };
 
   return (
@@ -80,7 +84,11 @@ const AddImage = () => {
           placeholder="Adicione uma legenda"
           className="w-full p-2 border rounded-lg mb-4 flex-1"
         />
-        <Button variant="secondary" onClick={triggerFileInput}>
+        <Button
+          disabled={caption.length === 0}
+          variant="secondary"
+          onClick={triggerFileInput}
+        >
           <ImageUp className="h-4 w-4 mr-2" /> Selecionar
         </Button>
       </div>
@@ -105,9 +113,14 @@ const AddImage = () => {
         <span className="mb-4">Selecione uma imagem para visualizar</span>
       )}
       {url && (
-        <Button onClick={handleSave} variant="default">
-          <SaveIcon className="h-4 w-4 mr-2" /> Salvar
-        </Button>
+        <LoadingButton
+          loading={isSaving}
+          onClick={handleSave}
+          icon={<SaveIcon className="h-4 w-4 mr-2" />}
+          variant="default"
+        >
+          Salvar
+        </LoadingButton>
       )}
     </div>
   );
