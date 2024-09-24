@@ -1,5 +1,5 @@
 import { GalleryViewProps } from "@/types/Gallery";
-import { Card, CardContent } from "./ui/card";
+import {  CardContent } from "./ui/card";
 import { useDrag, useDrop } from "react-dnd";
 import { useRef } from "react";
 
