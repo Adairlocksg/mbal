@@ -6,11 +6,6 @@ import { Link } from "react-router-dom";
 import { DragDropContext, DropResult } from "react-beautiful-dnd";
 import GalleryList from "@/components/gallery-list";
 
-/* interface ImageItem {
-  id: string;
-  url: string;
-}
- */
 export default function Gallery() {
   const [images, setImages] = useState<string[]>([]);
 
@@ -36,16 +31,6 @@ export default function Gallery() {
     newImages.splice(result.destination.index, 0, reorderedItem);
 
     setImages(newImages);
-
-    /*  // Update order in Firebase
-    await Promise.all(
-      newImages.map(async (image, index) => {
-        const imageRef = ref(storage, `images/${image}`);
-        await updateMetadata(imageRef, {
-          customMetadata: { order: index.toString() },
-        });
-      })
-    ); */
   };
 
   return (
