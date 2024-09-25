@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ImageUp, SaveIcon } from "lucide-react";
+import { ArrowLeft, ImageUp, PencilIcon, SaveIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { storage } from "@/firebase";
 import { ref, getDownloadURL, uploadBytesResumable } from "firebase/storage";
@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import axios from "axios";
 import { API_BASE_URL } from "@/api/api";
 import { useParams } from "react-router-dom";
+import { Image } from "@/types/Image";
 
 const AddImage = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -23,9 +24,19 @@ const AddImage = () => {
   const { id } = useParams();
 
   useEffect(() => {
+    const getImage = async (id: string) => {
+      try {
+        const response = await axios.get<Image>(`${API_BASE_URL}/images/${id}`);
+        const { url, caption } = response.data;
+        setUrl(url);
+        setCaption(caption);
+      } catch (error) {
+        toast.error(`Erro ao buscar imagem: ${error}`);
+      }
+    };
+
     if (id) {
-      console.log("Carregar imagem com ID:", id);
-      // Carregar a imagem com o ID
+      getImage(id);
     }
   }, [id]);
 
@@ -70,6 +81,10 @@ const AddImage = () => {
   };
 
   const handleSave = async () => {
+    id ? updateCaption() : addImage();
+  };
+
+  const addImage = async () => {
     if (!url) {
       toast.error("Selecione uma imagem para salvar");
     }
@@ -91,6 +106,28 @@ const AddImage = () => {
       }, 200);
     } catch (error) {
       toast.error(`Erro ao salvar imagem: ${error}`);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const updateCaption = async () => {
+    if (!caption) {
+      toast.error("Adicione uma legenda para salvar");
+    }
+
+    setIsSaving(true);
+
+    try {
+      await axios.put(`${API_BASE_URL}/images/${id}/caption`, {
+        caption,
+      });
+      toast.success("Legenda atualizada com sucesso!");
+      setTimeout(() => {
+        handleGoBack();
+      }, 200);
+    } catch (error) {
+      toast.error(`Erro ao atualizar legenda: ${error}`);
     } finally {
       setIsSaving(false);
     }
@@ -147,10 +184,16 @@ const AddImage = () => {
         <LoadingButton
           loading={isSaving}
           onClick={handleSave}
-          icon={<SaveIcon className="h-4 w-4 mr-2" />}
+          icon={
+            id ? (
+              <PencilIcon className="h-4 w-4 mr-2" />
+            ) : (
+              <SaveIcon className="h-4 w-4 mr-2" />
+            )
+          }
           variant="default"
         >
-          Salvar
+          {id ? "Atualizar legenda" : "Salvar"}
         </LoadingButton>
       )}
     </div>

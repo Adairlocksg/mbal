@@ -2,16 +2,23 @@ import { Responsive, WidthProvider } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import { Card, CardContent } from "./ui/card";
-import { GalleryViewProps } from "@/types/Gallery";
+import { GalleryViewProps, SequenceDict } from "@/types/Gallery";
 import { PencilIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { API_BASE_URL } from "@/api/api";
+import { safeJsonParse } from "@/helpers/json";
 const ResponsiveGridLayout = WidthProvider(Responsive);
+
+type UpdateImageSequencesItem = {
+  id: string;
+  newSequence: number;
+};
 
 const GalleryList = ({ images }: GalleryViewProps) => {
   const navigate = useNavigate();
-  // Mapeia as imagens para criar uma estrutura necessária para o grid layout
   const items = images.map((image, index) => ({
-    i: `img_${index}`, // ID único para cada item
+    i: image.id, // ID único para cada item
     x: index % 4, // Coluna inicial (modulo de 4 para 4 colunas)
     y: Math.floor(index / 4), // Linha inicial
     w: 1, // Largura do item
@@ -19,8 +26,57 @@ const GalleryList = ({ images }: GalleryViewProps) => {
     content: image, // URL da imagem
   }));
 
-  const onDragEnd = async () => {
-    console.log("Drag end");
+  const onDragEnd = async function (layout: ReactGridLayout.Layout[]) {
+    const sequenceDict = getSequenceDict(layout);
+    const lastSavedSequence = safeJsonParse<UpdateImageSequencesItem[]>(
+      localStorage.getItem("sequence")
+    );
+
+    const dto: UpdateImageSequencesItem[] = Object.keys(sequenceDict).map(
+      (key) => ({
+        id: key,
+        newSequence: sequenceDict[key],
+      })
+    );
+
+    if(!dto.length) return;
+
+    if (!lastSavedSequence) {
+      localStorage.setItem("sequence", JSON.stringify(dto));
+    }
+
+    if (checkIfSequenceChanged(lastSavedSequence, dto)) {
+      await axios.put(`${API_BASE_URL}/images/sequences`, { Images: dto });
+      localStorage.setItem("sequence", JSON.stringify(dto));
+    }
+  };
+
+  const checkIfSequenceChanged = (
+    lastSavedSequence: UpdateImageSequencesItem[] | undefined,
+    newSequence: UpdateImageSequencesItem[]
+  ) => {
+    if (!lastSavedSequence) return true;
+
+    return JSON.stringify(lastSavedSequence) !== JSON.stringify(newSequence);
+  };
+
+  const getSequenceDict = (layout: ReactGridLayout.Layout[]) => {
+    // Ordena o layout por y (linha) e depois por x (coluna)
+    const sortedLayout = layout.sort((a, b) => {
+      if (a.y === b.y) {
+        return a.x - b.x; // Se estiverem na mesma linha, ordena por coluna
+      }
+      return a.y - b.y; // Ordena por linha (y)
+    });
+
+    // Cria um dicionário onde o ID ('i') é a chave e a sequência é o valor
+    const sequenceDict: SequenceDict = {};
+
+    sortedLayout.forEach((item, index) => {
+      sequenceDict[item.i] = index + 1; // O valor da sequência é baseado na posição ordenada
+    });
+
+    return sequenceDict;
   };
 
   const handleEditClick = (id: string) => {
