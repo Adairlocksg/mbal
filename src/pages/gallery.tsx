@@ -1,37 +1,24 @@
 import { useEffect, useState } from "react";
 import { PlusCircle } from "lucide-react";
-import { storage } from "@/firebase";
-import { ref, listAll, getDownloadURL } from "firebase/storage";
 import { Link } from "react-router-dom";
-import { DragDropContext, DropResult } from "react-beautiful-dnd";
 import GalleryList from "@/components/gallery-list";
+import axios from "axios";
+import { API_BASE_URL } from "@/api/api";
+import { Image } from "@/types/Image";
 
 export default function Gallery() {
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<Image[]>([]);
 
   // Carrega as imagens do Firebase
   useEffect(() => {
     const fetchImages = async () => {
-      const imagesRef = ref(storage, "images/");
-      const result = await listAll(imagesRef);
-      const urls = await Promise.all(
-        result.items.map((itemRef) => getDownloadURL(itemRef))
-      );
-      setImages(urls);
+      const images = await axios.get<Image[]>(`${API_BASE_URL}/images`);
+
+      setImages(images.data);
     };
 
     fetchImages();
   }, []);
-
-  const onDragEnd = async (result: DropResult) => {
-    if (!result.destination) return;
-
-    const newImages = Array.from(images);
-    const [reorderedItem] = newImages.splice(result.source.index, 1);
-    newImages.splice(result.destination.index, 0, reorderedItem);
-
-    setImages(newImages);
-  };
 
   return (
     <div className="container mx-auto p-4 bg-background min-h-screen">
@@ -47,9 +34,8 @@ export default function Gallery() {
           <PlusCircle className="h-4 w-4 mr-2" /> Adicionar Imagem
         </Link>
       </div>
-      <DragDropContext onDragEnd={onDragEnd}>
-        <GalleryList images={images} />
-      </DragDropContext>
+
+      <GalleryList images={images} />
     </div>
   );
 }
@@ -99,4 +85,3 @@ export default function Gallery() {
 // };
 
 // export default GalleryList;
-

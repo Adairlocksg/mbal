@@ -12,6 +12,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Gallery />}></Route>
           <Route path="/add-image" element={<AddImage />}></Route>
+          <Route path="/edit-image/:id" element={<AddImage />}></Route>
         </Routes>
       </Router>
     </div>

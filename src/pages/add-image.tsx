@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ImageUp, SaveIcon } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { storage } from "@/firebase";
 import { ref, getDownloadURL, uploadBytesResumable } from "firebase/storage";
 import { CardContent } from "@/components/ui/card";
@@ -8,6 +8,10 @@ import { useNavigate } from "react-router-dom"; // Para navegação
 import { Input } from "@/components/ui/input";
 import Progress from "@/components/progress";
 import LoadingButton from "@/components/ui/base/loading-button";
+import { toast } from "sonner";
+import axios from "axios";
+import { API_BASE_URL } from "@/api/api";
+import { useParams } from "react-router-dom";
 
 const AddImage = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -16,6 +20,14 @@ const AddImage = () => {
   const [caption, setCaption] = useState<string>("");
   const [isSaving, setIsSaving] = useState(false);
   const navigate = useNavigate();
+  const { id } = useParams();
+
+  useEffect(() => {
+    if (id) {
+      console.log("Carregar imagem com ID:", id);
+      // Carregar a imagem com o ID
+    }
+  }, [id]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files === null) return;
@@ -57,16 +69,35 @@ const AddImage = () => {
     navigate("/"); // Volta para a tela inicial
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (!url) {
+      toast.error("Selecione uma imagem para salvar");
+    }
+
+    if (!caption) {
+      toast.error("Adicione uma legenda para salvar");
+    }
+
     setIsSaving(true);
-    setTimeout(() => {
+
+    try {
+      await axios.post(`${API_BASE_URL}/images`, {
+        url,
+        caption,
+      });
+      toast.success("Imagem salva com sucesso!");
+      setTimeout(() => {
+        handleGoBack();
+      }, 200);
+    } catch (error) {
+      toast.error(`Erro ao salvar imagem: ${error}`);
+    } finally {
       setIsSaving(false);
-    }, 1000);
+    }
   };
 
   return (
     <div className="flex flex-col items-center p-4">
-      {/* Flecha para voltar */}
       <div className="w-full flex justify-start mb-4">
         <Button
           className="bg-transparent hover:bg-gray-200 text-primary-foreground p-2"
@@ -85,7 +116,7 @@ const AddImage = () => {
           className="w-full p-2 border rounded-lg mb-4 flex-1"
         />
         <Button
-          disabled={caption.length === 0}
+          disabled={caption.length === 0 || id !== undefined}
           variant="secondary"
           onClick={triggerFileInput}
         >

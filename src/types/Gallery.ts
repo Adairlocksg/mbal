@@ -1,5 +1,7 @@
+import { Image } from "./Image";
+
 export type GalleryViewProps = {
-  images: string[];
+  images: Image[];
 };
 
 export enum GalleryView {
