@@ -86,11 +86,11 @@ const AddImage = () => {
 
   const addImage = async () => {
     if (!url) {
-      toast.error("Selecione uma imagem para salvar");
+      return toast.error("Selecione uma imagem para salvar");
     }
 
     if (!caption) {
-      toast.error("Adicione uma legenda para salvar");
+      return toast.error("Adicione uma legenda para salvar");
     }
 
     setIsSaving(true);
