@@ -3,16 +3,14 @@ import { PlusCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import GalleryList from "@/components/gallery-list";
 import axios from "axios";
-import { API_BASE_URL } from "@/api/api";
 import { Image } from "@/types/Image";
 
 export default function Gallery() {
   const [images, setImages] = useState<Image[]>([]);
 
-  // Carrega as imagens do Firebase
   useEffect(() => {
     const fetchImages = async () => {
-      const images = await axios.get<Image[]>(`${API_BASE_URL}/images`);
+      const images = await axios.get<Image[]>("/images");
 
       setImages(images.data);
     };

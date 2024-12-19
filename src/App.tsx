@@ -1,19 +1,33 @@
 import "./App.css";
-import Gallery from "./pages/gallery";
 import { Toaster } from "./components/ui/sonner";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import AddImage from "./pages/add-image";
+import { BrowserRouter as Router } from "react-router-dom";
+import InternalRoutes from "./routes/internal-routes";
+import ExternalRoutes from "./routes/external-routes";
+import { setBaseUrl, setDefaultHeaders } from "./helpers/axios-helper";
 
 function App() {
+  const token = localStorage.getItem("@token");
+
+  setBaseUrl();
+
+  if (!token) {
+    return (
+      <>
+        <Toaster richColors position="top-center" />
+        <Router>
+          <ExternalRoutes />
+        </Router>
+      </>
+    );
+  }
+
+  setDefaultHeaders(token);
+
   return (
     <div>
       <Toaster richColors position="top-center" />
       <Router>
-        <Routes>
-          <Route path="/" element={<Gallery />}></Route>
-          <Route path="/add-image" element={<AddImage />}></Route>
-          <Route path="/edit-image/:id" element={<AddImage />}></Route>
-        </Routes>
+        <InternalRoutes />
       </Router>
     </div>
   );

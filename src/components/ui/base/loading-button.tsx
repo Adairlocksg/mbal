@@ -14,11 +14,11 @@ const LoadingButton = ({
 }: LoadingButtonProps) => {
   return (
     <Button {...otherProps} disabled={loading}>
+      {children}
+      {!loading && !!icon ? icon : null}
       <Loader2Icon
         className={`h-4 w-4 mr-2 animate-spin ${loading ? "block" : "hidden"}`}
       />
-      {!loading && !!icon ? icon : null}
-      {children}
     </Button>
   );
 };

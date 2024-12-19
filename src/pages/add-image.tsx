@@ -81,7 +81,11 @@ const AddImage = () => {
   };
 
   const handleSave = async () => {
-    id ? updateCaption() : addImage();
+    if (id) {
+      updateCaption();
+    } else {
+      addImage();
+    }
   };
 
   const addImage = async () => {
@@ -96,7 +100,7 @@ const AddImage = () => {
     setIsSaving(true);
 
     try {
-      await axios.post(`${API_BASE_URL}/images`, {
+      await axios.post(`/images`, {
         url,
         caption,
       });
@@ -186,9 +190,9 @@ const AddImage = () => {
           onClick={handleSave}
           icon={
             id ? (
-              <PencilIcon className="h-4 w-4 mr-2" />
+              <PencilIcon className="h-4 w-4 ml-2" />
             ) : (
-              <SaveIcon className="h-4 w-4 mr-2" />
+              <SaveIcon className="h-4 w-4 ml-2" />
             )
           }
           variant="default"
